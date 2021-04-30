@@ -24,7 +24,7 @@ from nipype.interfaces import fsl
 from nipype.interfaces.utility import Rename
 from nilearn import image
 from nilearn.connectome import ConnectivityMeasure
-from nilearn.input_data import NiftiLabelsMasker
+from nilearn.input_data import NiftiLabelsMasker, NiftiMapsMasker
 import nibabel as nib
 
 
@@ -138,12 +138,22 @@ out_dir = os.path.join(sys.argv[3],subject_id)
 
 # df = pd.read_csv(base_dir+'/fmriprep_list', header=None)
 
-dataset = datasets.fetch_atlas_schaefer_2018(n_rois=1000, yeo_networks=7, 
-                            resolution_mm=1)
-atlas_filename = dataset.maps
-labels = dataset.labels
-masker = NiftiLabelsMasker(labels_img=atlas_filename, standardize=True,
-                           memory='nilearn_cache', verbose=0)
+########## schaefer 400/1000
+# dataset = datasets.fetch_atlas_schaefer_2018(n_rois=400, yeo_networks=7, 
+#                             resolution_mm=1, verbose=0)
+# atlas_filename = dataset.maps
+# labels = dataset.labels
+# masker = NiftiLabelsMasker(labels_img=atlas_filename, standardize=True,
+#                            memory='nilearn_cache', verbose=0)
+
+
+########## Willard 499 ROI #########
+parcel_file = '/home/nabaruns/willard_fROIs_atlas.nii.gz'
+atlas = image.load_img(parcel_file)
+masker = NiftiMapsMasker(
+    atlas, resampling_target="data", t_r=2.5, detrend=True,
+    low_pass=.1, high_pass=.01, memory='nilearn_cache', memory_level=1)
+
 f(in_dir, out_dir, subject_id)
 # p = Pool()
 # p.map(f, df[0])
