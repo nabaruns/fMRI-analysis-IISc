@@ -1,6 +1,6 @@
 #!/bin/sh
-#SBATCH --job-name=fmriprep    # Job name
-#SBATCH --array=1-608%10
+#SBATCH --job-name=func_corr    # Job name
+#SBATCH --array=1-344%10
 #SBATCH --ntasks=1         # Run on a single CPU
 #SBATCH --time=04:00:00  # Time limit hrs:min:sec
 #SBATCH -o log/%x-%A-%a.out
@@ -36,7 +36,7 @@ exitcode=$?
 # 	echo Failed SCP tasks ${SLURM_ARRAY_TASK_ID} with exit code $exitcode
 # 	exit $exitcode
 # fi
-cmd="python $HOME/slurm_func_conn_gen.py $subject $BIDS_DIR $OUT_DIR"
+cmd="python3 $HOME/slurm_func_conn_gen.py $subject $BIDS_DIR $OUT_DIR"
 # cmd="fmriprep-docker $BIDS_DIR/$subject/ $OUT_DIR/$subject/ --participant_label $sids --fs-license-file $HOME/freesurfer.txt --fs-no-reconall --output-spaces MNI152NLin6Asym:res-2"
 echo Running task ${SLURM_ARRAY_TASK_ID}
 echo Commandline: $cmd

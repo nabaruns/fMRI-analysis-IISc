@@ -138,7 +138,7 @@ out_dir = os.path.join(sys.argv[3],subject_id)
 
 # df = pd.read_csv(base_dir+'/fmriprep_list', header=None)
 
-########## schaefer 400/1000
+########## schaefer 400/1000 ROI #########
 # dataset = datasets.fetch_atlas_schaefer_2018(n_rois=400, yeo_networks=7, 
 #                             resolution_mm=1, verbose=0)
 # atlas_filename = dataset.maps

@@ -1,6 +1,6 @@
 #!/bin/sh
 #SBATCH --job-name=fmriprepRADC    # Job name
-#SBATCH --array=1-152%3
+#SBATCH --array=1-80%2
 #SBATCH --ntasks=1         # Run on a single CPU
 #SBATCH --time=06:00:00  # Time limit hrs:min:sec
 #SBATCH -o log/%x-%A-%a.out
