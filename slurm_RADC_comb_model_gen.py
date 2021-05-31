@@ -48,7 +48,7 @@ DEVICE = torch.device("cuda:0")
 outlist = []
 class_list =[]
 
-df = pd.read_csv("/home/nabaruns/119subcor1000.csv")
+df = pd.read_csv("/home/nabaruns/radc_age_gender_labels.csv")
 print(df.head())
 
 
@@ -284,12 +284,12 @@ print("Reading T1w images...\n")
 #         index_91.append(i)
 # print(np.shape(pooled_t1_img))
 
-infile = open(os.path.join(PATH, "anat_all"),'rb')
+infile = open(os.path.join(PATH, "anat_all_nan"),'rb')
 pooled_t1_img = pickle.load(infile)
 infile.close()
 print(np.shape(pooled_t1_img))
 
-infile = open(os.path.join(PATH, "index_91_all"),'rb')
+infile = open(os.path.join(PATH, "index_91pnan"),'rb')
 index_91 = pickle.load(infile)
 infile.close()
 print(np.shape(index_91))
@@ -305,7 +305,7 @@ print("Reading fMRI correlation matrices...\n")
 #     pooled_corr_mat.append(corr_mat[0])
 # print(np.shape(pooled_corr_mat))
 
-infile = open(os.path.join(PATH, "Willard499_all"),'rb')
+infile = open(os.path.join(PATH, "Willard499_all_nan"),'rb')
 pooled_corr_mat = pickle.load(infile)
 infile.close()
 print(np.shape(pooled_corr_mat))
@@ -334,7 +334,7 @@ def train_model(rseed):
     X, y = make_imbalance(
         np.array(X_index).reshape(-1, 1),
         ylabels,
-        sampling_strategy={0: 96, 1: 96},
+        sampling_strategy={0: 150, 1: 150},
         random_state=RANDOM_STATE,
     )
     train_x, val_x, train_y, val_y = train_test_split(X.reshape(1,-1)[0], y, test_size = 0.3, random_state=RANDOM_STATE, stratify=y)
@@ -526,8 +526,8 @@ def train_model(rseed):
 # for i in range(100):
 #     print("iter ", i)
     # rs = random.randint(3, 1000)
-    
+
 train_model(int(sys.argv[1]))
 
-np.save("outlist_gender", outlist)
-np.save("class_list_gender", class_list)
+np.save("outlist_gender750", outlist)
+np.save("class_list_gender750", class_list)

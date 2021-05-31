@@ -1,4 +1,3 @@
-# coding: utf-8
 import os, sys
 import pandas as pd
 import numpy as np
@@ -66,6 +65,8 @@ def crop_center(data, out_sp):
     return data_crop
 
 
+# index_nan = np.array(df[df['age_bin'].isnull()].index)
+
 # data_dir = "/4tb/nabarun/RADC/fmriprep/anat"
 
 # pooled_t1_img = []
@@ -130,6 +131,17 @@ infile.close()
 print(np.shape(pooled_corr_mat))
 
 
+# In[19]:
+
+
+# df.dropna(inplace=True)
+# for idx in df[df["sex"].isnull()].index:
+#     pooled_corr_mat = np.delete(pooled_corr_mat, idx)
+
+
+# In[20]:
+
+
 def plot_matrices(matrices, matrix_kind):
     n_matrices = len(matrices)
     fig = plt.figure(figsize=(n_matrices * 4, 4))
@@ -181,6 +193,9 @@ def task_importance_weights(label_array):
     return imp
 
 
+# In[25]:
+
+
 ##########################
 ### SETTINGS
 ##########################
@@ -196,7 +211,7 @@ sigma = 1
 # importance_weights = torch.ones(NUM_CLASSES-1, dtype=torch.float)
 train_y_ages = torch.tensor(train_y, dtype=torch.float)
 
-IMP_WEIGHT = 0
+IMP_WEIGHT = 1
 # Data-specific scheme
 if not IMP_WEIGHT:
     importance_weights = torch.ones(NUM_CLASSES-1, dtype=torch.float)
@@ -206,7 +221,7 @@ elif IMP_WEIGHT == 1:
 
 # train_dataset = TensorDataset( Tensor(pooled_t1_img[train_x]), Tensor(train_y) )
 # val_dataset = TensorDataset( Tensor(pooled_t1_img[val_x]), Tensor(val_y) )
-test_dataset = TensorDataset( Tensor(pooled_t1_img[test_x]), Tensor(test_y) )
+test_dataset = TensorDataset( Tensor(pooled_corr_mat[test_x]), Tensor(test_y) )
 
 # del pooled_t1_img, pooled_corr_mat
 # gc.collect()
@@ -236,17 +251,21 @@ test_loader = DataLoader(dataset=test_dataset,
 #     print('Image label dimensions:', labels.shape)
 #     break
 for images1, labels in test_loader:  
-    print('Test Image batch dimensions:', images1.shape)
-    print('Test Image label dimensions:', labels.shape)
+    print('Image batch dimensions:', images1.shape)
+    print('Image label dimensions:', labels.shape)
     break
 
 
 # # SFCN+Rank ordinal
 
+# In[26]:
+
+
 def label_to_levels(label, num_classes):
     levels = [1]*label + [0]*(num_classes - 1 - label)
     levels = torch.tensor(levels, dtype=torch.float32)
     return levels
+
 
 def num2vect(x, bin_range, bin_step, sigma):
     """
@@ -292,12 +311,14 @@ def num2vect(x, bin_range, bin_step, sigma):
             return v, bin_centers
 
 
-
 def cost_fn(logits, levels, imp):
     val = (-torch.sum((F.logsigmoid(logits)*levels
                       + (F.logsigmoid(logits) - logits)*(1-levels))*imp,
            dim=1))
     return torch.mean(val)
+
+
+# In[32]:
 
 
 def my_KLDivLoss(x, y):
@@ -312,6 +333,9 @@ def my_KLDivLoss(x, y):
     loss = loss_func(x, y) / n
     #print(loss)
     return loss
+
+
+# In[33]:
 
 
 def compute_cost(model, data_loader, device):
@@ -342,6 +366,9 @@ def compute_cost(model, data_loader, device):
     return loss
 
 
+# In[34]:
+
+
 def compute_mae_and_mse(model, data_loader, device):
     mae, mse, num_examples = 0, 0, 0
     for i, (features, targets) in enumerate(data_loader):
@@ -351,8 +378,10 @@ def compute_mae_and_mse(model, data_loader, device):
         ###------------------------------START-----------------------------------###
         levels = []
         for label in targets:
-            levels_from_label = label_to_levels(int(label.item()), NUM_CLASSES)
-            levels.append(levels_from_label)
+            y, bc = num2vect(int(label.item()), bin_range, bin_step, sigma)
+            bc = torch.tensor(bc, dtype=torch.float32)
+            # levels_from_label = label_to_levels(int(label.item()), NUM_CLASSES)
+            levels.append(bc)
         levels = torch.stack(levels)
         ###------------------------------END-------------------------------------###
 
@@ -361,20 +390,27 @@ def compute_mae_and_mse(model, data_loader, device):
         targets = targets.to(device)
 
         predicted_labels = []
-        logits, probas = model(features)
-#         x = output[0].cpu().reshape(levels.size())
-#         prob = np.exp(x)
-#         prob = prob.to(device)
-        predict_levels = probas > 0.5
-        predicted_labels = torch.sum(predict_levels, dim=1)
+        output = model(features)
+        x = output[0].cpu().reshape(levels.size())
+        prob = np.exp(x)
+        prob = prob.to(device)
+        # pred = prob@levels
+        for i,bc in enumerate(levels):
+            pred = prob[i]@bc
+            pred = torch.tensor(pred, dtype=torch.float32)
+            predicted_labels.append(pred)
         num_examples += targets.size(0)
-#         print(probas.size(), targets.size())
+        predicted_labels = torch.stack(predicted_labels)
+#         print(predicted_labels, targets)
         mae += torch.abs(predicted_labels - targets).sum().data
         mse += ((predicted_labels - targets)*(predicted_labels - targets)).sum().data
         del features, targets
     mae = mae.float() / num_examples
     mse = mse.float() / num_examples
     return mae, mse
+
+
+# In[35]:
 
 
 def reset_weights(m):
@@ -384,8 +420,11 @@ def reset_weights(m):
     '''
     for layer in m.children():
         if hasattr(layer, 'reset_parameters'):
-#             print(f'Reset trainable parameters of layer = {layer}')
+            print(f'Reset trainable parameters of layer = {layer}')
             layer.reset_parameters()
+
+
+# In[36]:
 
 
 class SFCN2D(nn.Module):
@@ -453,6 +492,9 @@ class SFCN2D(nn.Module):
         return out
 
 
+# In[37]:
+
+
 class SFCN3D(nn.Module):
     def __init__(self, channel_number=[32, 64, 128, 128, 64], output_dim=31, dropout=True):
         super(SFCN3D, self).__init__()
@@ -485,11 +527,9 @@ class SFCN3D(nn.Module):
             self.classifier.add_module('dropout', nn.Dropout(0.5))
         i = n_layer
         in_channel = channel_number[-1]
-        out_channel = output_dim-1
+        out_channel = output_dim
         self.classifier.add_module('conv_%d' % i,
                                    nn.Conv3d(in_channel, out_channel, padding=0, kernel_size=1))
-        self.classifier.add_module('flatten', nn.Flatten())
-        self.linear_1_bias = nn.Parameter(torch.zeros(out_channel).float()) 
 
     @staticmethod
     def conv_layer(in_channel, out_channel, maxpool=True, kernel_size=3, padding=0, maxpool_stride=2):
@@ -511,14 +551,16 @@ class SFCN3D(nn.Module):
     def forward(self, x):
         out = list()
 #         print(x.shape)
-        x = self.feature_extractor(x)
-        logits = self.classifier(x)
-#         print("1", logits.shape)
-        logits = logits + self.linear_1_bias
-#         print("2", logits.shape)
-        probas = torch.sigmoid(logits)
-#         print("3", logits.shape, probas.shape)
-        return logits, probas
+        x_f = self.feature_extractor(x)
+#         print(x_f.shape)
+        x = self.classifier(x_f)
+#         print(x.shape)
+        x = F.log_softmax(x, dim=1)
+        out.append(x)
+        return out
+
+
+# In[38]:
 
 
 NUM_WORKERS = 1
@@ -531,7 +573,7 @@ DEVICE = torch.device("cuda:0")
 importance_weights = importance_weights.to(DEVICE)
 BATCH_SIZE = batch_size
 
-model = SFCN3D()
+model = SFCN2D()
 model = torch.nn.DataParallel(model)
 model.to(DEVICE)
 # optimizer = torch.optim.Adam(model.parameters(), lr=learning_rate) 
@@ -545,12 +587,15 @@ def train_model(model,optimizer,train_loader,epoch=1):
     for batch_idx, (features, targets) in enumerate(train_loader):
 
         ###################################
-        ##### CORAL LABEL CONVERSION #####
+        ##### num2vect LABEL CONVERSION #####
         ###------------------------------START-----------------------------------###
         levels = []
         for label in targets:
-            levels_from_label = label_to_levels(int(label.item()), NUM_CLASSES)
-            levels.append(levels_from_label)
+            # print(int(label.item()))
+            y, bc = num2vect(int(label.item()), bin_range, bin_step, sigma)
+            y = torch.tensor(y, dtype=torch.float32)
+            # levels_from_label = label_to_levels(int(label.item()), NUM_CLASSES)
+            levels.append(y)
         levels = torch.stack(levels)
         ###------------------------------END-------------------------------------###
         features = features.to(DEVICE)
@@ -558,11 +603,16 @@ def train_model(model,optimizer,train_loader,epoch=1):
         levels = levels.to(DEVICE)
 
         # FORWARD AND BACK PROP
+        output = model(features)
+#         print(output.size(), levels.size(), importance_weights.size())
+        x = output[0].reshape(levels.size())
+        # print(logits.size(), levels.size(), importance_weights.size())
+        # print(x, levels)
+        # break
+        cost = my_KLDivLoss(x, levels)
         optimizer.zero_grad()
-        logits, probas = model(features)
-#         x = output[0].reshape(levels.size())
-        cost = cost_fn(logits, levels, importance_weights)
         cost.backward()
+        # UPDATE MODEL PARAMETERS
         optimizer.step()
 
         # LOGGING
@@ -575,18 +625,22 @@ def train_model(model,optimizer,train_loader,epoch=1):
             #     f.write('%s\n' % s)
 
 
+# In[42]:
+
+
 numfold = 10
-results = {}
+foldidx = 1
 kf = KFold(n_splits=numfold, shuffle=True, random_state=RANDOM_STATE)
 start_time = time.time()
-for fold, (train_index, val_index) in enumerate(kf.split(train_x)): 
-    print('--------------------------------')
+best_mae, best_rmse, best_epoch = 999, 999, -1
+
+for fold, (train_index, val_index) in enumerate(kf.split(train_x)):
+    print('--------------------------------') 
     print(f'FOLD {fold}')
     print('--------------------------------')
-    best_mae, best_rmse, best_epoch = 999, 999, -1
     
-    train_dataset = TensorDataset( Tensor(pooled_t1_img[train_index]), Tensor(ylabels[train_index]) )
-    val_dataset = TensorDataset( Tensor(pooled_t1_img[val_index]), Tensor(ylabels[val_index]) )
+    train_dataset = TensorDataset( Tensor(pooled_corr_mat[train_index]), Tensor(ylabels[train_index]) )
+    val_dataset = TensorDataset( Tensor(pooled_corr_mat[val_index]), Tensor(ylabels[val_index]) )
 
     train_loader = DataLoader(dataset=train_dataset, 
                               batch_size=batch_size, 
@@ -599,16 +653,9 @@ for fold, (train_index, val_index) in enumerate(kf.split(train_x)):
 
     train_dataset_len = len(train_dataset)
     
-    model = SFCN3D()
-    model.apply(reset_weights)
-    model = torch.nn.DataParallel(model)
-    model.to(DEVICE)
-    optimizer = torch.optim.SGD(model.parameters(), lr=0.01, momentum=0.9)
-    scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=0.3)
-    
     for epoch in range(num_epochs):
         model.train()
-        train_model(model, optimizer, train_loader, epoch)
+        train_model(model,optimizer,train_loader,epoch)
 
         model.eval()
         with torch.set_grad_enabled(False):
@@ -617,113 +664,74 @@ for fold, (train_index, val_index) in enumerate(kf.split(train_x)):
 
         if valid_mae < best_mae:
             best_mae, best_rmse, best_epoch = valid_mae, torch.sqrt(valid_mse), epoch
-            torch.save(model.state_dict(), os.path.join(inPATH, f'best_model_rank_seed_{RANDOM_STATE}_fold_{fold}.pt'))
+            torch.save(model.state_dict(), os.path.join(inPATH, f'best_model_sfcn_corr_seed_{RANDOM_STATE}.pt'))
 
         scheduler.step(valid_mae)
-        s = 'MAE/RMSE: | Current Valid: %.2f/%.2f Ep. %d | Best Valid : %.2f/%.2f Ep. %d | Time elapsed: %.2f min' % (
-            valid_mae, torch.sqrt(valid_mse), epoch, best_mae, best_rmse, best_epoch, ((time.time() - start_time)/60))
+        s = 'MAE/RMSE: | Current Valid: %.2f/%.2f Ep. %d | Best Valid : %.2f/%.2f Ep. %d' % (
+            valid_mae, torch.sqrt(valid_mse), epoch, best_mae, best_rmse, best_epoch)
         print(s)
         # with open(LOGFILE, 'a') as f:
         #     f.write('%s\n' % s)
-        
-        
-    # model.load_state_dict(torch.load(os.path.join(inPATH, f'best_model_rank_fold_{fold}.pt')))
-#     model.eval()
-#     with torch.set_grad_enabled(False):
-#         test_mae, test_mse = compute_mae_and_mse(model, test_loader,
-#                                                    device=DEVICE)
-#     print('--------------------------------')
-#     s = 'Test MAE/RMSE: %.2f/%.2f ' % (
-#             test_mae, torch.sqrt(test_mse))
-#     print(s)
-    results[fold] = best_mae
+
+        s = 'Time elapsed: %.2f min' % ((time.time() - start_time)/60)
+        print(s)
+        # with open(LOGFILE, 'a') as f:
+        #     f.write('%s\n' % s)
+
+
+# In[43]:
 
 
 ########## SAVE PREDICTIONS ######
-# all_pred = []
-# all_probas = []
-# model.load_state_dict(torch.load(os.path.join(PATH, 'best_model_rank_fold_0.pt')))
-# model.eval()
-# with torch.set_grad_enabled(False):
-#     test_mae, test_mse = compute_mae_and_mse(model, test_loader,
-#                                                device=DEVICE)
-# s = 'Test MAE/RMSE: %.2f/%.2f ' % (
-#         test_mae, torch.sqrt(test_mse))
-# print(s)
-# with torch.set_grad_enabled(False):
-#     for batch_idx, (features, targets) in enumerate(test_loader):
+all_pred = []
+all_probas = []
+model.load_state_dict(torch.load(os.path.join(inPATH, f'best_model_sfcn_corr_seed_{RANDOM_STATE}.pt')))
+model.eval()
+with torch.set_grad_enabled(False):
+    test_mae, test_mse = compute_mae_and_mse(model, test_loader,
+                                               device=DEVICE)
+s = 'Test MAE/RMSE: %.2f/%.2f ' % (
+        test_mae, torch.sqrt(test_mse))
+print(s)
+with torch.set_grad_enabled(False):
+    for batch_idx, (features, targets) in enumerate(test_loader):
 
-#         ###################################
-#         ##### CORAL LABEL CONVERSION #####
-#         ###------------------------------START-----------------------------------###
-#         levels = []
-#         for label in targets:
-#             levels_from_label = label_to_levels(int(label.item()), NUM_CLASSES)
-#             levels.append(levels_from_label)
-#         levels = torch.stack(levels)
-#         ###------------------------------END-------------------------------------###
-
-#         levels = levels.to(DEVICE)
-#         features = features.to(DEVICE)
-#         targets = targets.to(DEVICE)
-
-#         predicted_labels = []
-#         logits, probas = model(features)
-# #         x = output[0].cpu().reshape(levels.size())
-# #         prob = np.exp(x)
-# #         prob = prob.to(device)
-#         predict_levels = probas > 0.5
-#         predicted_labels = torch.sum(predict_levels, dim=1)
-#         lst = [int(i) for i in predicted_labels]
-#         all_pred.extend(lst)
-
-
-all_out = []
-for fold in range(numfold):
-    all_pred = []
-    all_probas = []
-    model.load_state_dict(torch.load(os.path.join(inPATH, f'best_model_rank_seed_{RANDOM_STATE}_fold_{fold}.pt')))
-    model.eval()
-    with torch.set_grad_enabled(False):
-        test_mae, test_mse = compute_mae_and_mse(model, test_loader,
-                                                   device=DEVICE)
-    s = 'Test MAE/RMSE: %.2f/%.2f ' % (
-            test_mae, torch.sqrt(test_mse))
-    print(s)
-    with torch.set_grad_enabled(False):
-        for batch_idx, (features, targets) in enumerate(test_loader):
-
-            ###################################
-            ##### CORAL LABEL CONVERSION #####
-            ###------------------------------START-----------------------------------###
-            levels = []
-            for label in targets:
-                levels_from_label = label_to_levels(int(label.item()), NUM_CLASSES)
-                levels.append(levels_from_label)
-            levels = torch.stack(levels)
-            ###------------------------------END-------------------------------------###
-
-            levels = levels.to(DEVICE)
-            features = features.to(DEVICE)
-            targets = targets.to(DEVICE)
-
-            predicted_labels = []
-            logits, probas = model(features)
-    #         x = output[0].cpu().reshape(levels.size())
-    #         prob = np.exp(x)
-    #         prob = prob.to(device)
-            predict_levels = probas > 0.5
-            predicted_labels = torch.sum(predict_levels, dim=1)
-            lst = [int(i) for i in predicted_labels]
-            all_pred.extend(lst)
-    all_out.append(np.array(all_pred))
+        ###################################
+        ##### num2vect LABEL CONVERSION #####
+        ###------------------------------START-----------------------------------###
+        levels = []
+        for label in targets:
+            # print(int(label.item()))
+            y, bc = num2vect(int(label.item()), bin_range, bin_step, sigma)
+            # print(int(label.item()),bc)
+            bc = torch.tensor(bc, dtype=torch.float32)
+            # levels_from_label = label_to_levels(int(label.item()), NUM_CLASSES)
+            levels.append(bc)
+        levels = torch.stack(levels)
+        ###------------------------------END-------------------------------------###
+        
+        predicted_labels = []
+        output = model(features)
+        x = output[0].cpu().reshape(levels.size())
+        prob = np.exp(x)
+        for i,bc in enumerate(levels):
+            pred = prob[i]@bc
+            pred = torch.tensor(pred, dtype=torch.float32)
+            predicted_labels.append(pred)
+        lst = [int(i) for i in predicted_labels]
+        all_pred.extend(lst)
 
 
-all_out = pd.DataFrame(all_out).transpose()
-all_out['majority'] = all_out.mode(axis=1)[0]
-
-all_out.to_csv(os.path.join(inPATH, f'output_rank_seed_750sub_{RANDOM_STATE}'), encoding='utf-8', index=False)
+# In[44]:
 
 
-print(np.array(all_out['majority']), test_y)
-print("Majority voting Test MAE: ", np.abs(np.array(all_out['majority']) - test_y).sum()/len(test_y))
+print(test_y, np.array(all_pred))
+
+
+# In[45]:
+
+
+plt.scatter(test_y[:]+64, np.array(all_pred)[:]+64)
+plt.ylabel("prediction")
+plt.xlabel("age_at_visit")
+plt.show()

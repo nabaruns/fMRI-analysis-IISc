@@ -1,5 +1,5 @@
 #!/bin/sh
-#SBATCH --job-name=radc_gen    # Job name
+#SBATCH --job-name=radc_age_corr_cv    # Job name
 #SBATCH --array=1-100%4
 #SBATCH --ntasks=1         # Run on a single CPU
 #SBATCH --time=04:00:00  # Time limit hrs:min:sec
@@ -14,7 +14,7 @@ BASE_DIR="/media/nabarun/TATA_MRI_Data_RAW"
 BIDS_DIR="$SCRATCH_DIR/incorr"
 OUT_DIR="$SCRATCH_DIR/outcorr"
 
-cmd="python3 $HOME/slurm_RADC_comb_model_gen.py $SLURM_ARRAY_TASK_ID"
+cmd="python3 $HOME/slurm_RADC_sfcn_mae_soft-age-cv-corr.py $SLURM_ARRAY_TASK_ID"
 # cmd="fmriprep-docker $BIDS_DIR/$subject/ $OUT_DIR/$subject/ --participant_label $sids --fs-license-file $HOME/freesurfer.txt --fs-no-reconall --output-spaces MNI152NLin6Asym:res-2"
 echo Running task ${SLURM_ARRAY_TASK_ID}
 echo Commandline: $cmd
