@@ -1,6 +1,6 @@
 #!/bin/sh
 #SBATCH --job-name=radc_age_corr_cv    # Job name
-#SBATCH --array=1-100%4
+#SBATCH --array=1-30%4
 #SBATCH --ntasks=1         # Run on a single CPU
 #SBATCH --time=04:00:00  # Time limit hrs:min:sec
 #SBATCH -o log/%x-%A-%a.out

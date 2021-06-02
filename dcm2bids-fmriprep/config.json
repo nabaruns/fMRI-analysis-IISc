@@ -5,7 +5,7 @@
             "modalityLabel": "bold",
             "customLabels": "task-rest",
             "criteria": {
-                   "SidecarFilename":"*ep2d*"
+                   "SidecarFilename":"*ep2d**bold*"
                         },
             "sidecarChanges": {
                 "TaskName": "rest"
@@ -15,21 +15,21 @@
             "dataType": "anat",
             "modalityLabel": "T1w",
             "criteria": {
-                   "SidecarFilename": "*002**mpr*"
+                   "SidecarFilename": "*t1**sag*"
                          }
         },
         {
             "dataType": "fmap",
             "modalityLabel": "magnitude1",
             "criteria": {
-                "SidecarFilename": "*010**e1*"
+                "SidecarFilename": "*gre**e1*"
                         }
         },
         {
             "dataType": "fmap",
             "modalityLabel": "magnitude2",
             "criteria": {
-                "SidecarFilename": "*010**e2*"
+                "SidecarFilename": "*gre**e2*"
                         }
         },
         {

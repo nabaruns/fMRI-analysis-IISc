@@ -24,7 +24,7 @@ from torchvision import transforms
 from torch.utils.data import DataLoader, TensorDataset
 from torch import Tensor
 
-RANDOM_STATE = int(sys.argv[1])
+RANDOM_STATE = int(sys.argv[1])+71
 random.seed(RANDOM_STATE)
 np.random.seed(RANDOM_STATE)
 
@@ -667,13 +667,8 @@ for fold, (train_index, val_index) in enumerate(kf.split(train_x)):
             torch.save(model.state_dict(), os.path.join(inPATH, f'best_model_sfcn_corr_seed_{RANDOM_STATE}.pt'))
 
         scheduler.step(valid_mae)
-        s = 'MAE/RMSE: | Current Valid: %.2f/%.2f Ep. %d | Best Valid : %.2f/%.2f Ep. %d' % (
-            valid_mae, torch.sqrt(valid_mse), epoch, best_mae, best_rmse, best_epoch)
-        print(s)
-        # with open(LOGFILE, 'a') as f:
-        #     f.write('%s\n' % s)
-
-        s = 'Time elapsed: %.2f min' % ((time.time() - start_time)/60)
+        s = 'MAE/RMSE: | Current Valid: %.2f/%.2f Ep. %d | Best Valid : %.2f/%.2f Ep. %d | Time elapsed: %.2f min' % (
+            valid_mae, torch.sqrt(valid_mse), epoch, best_mae, best_rmse, best_epoch, ((time.time() - start_time)/60))
         print(s)
         # with open(LOGFILE, 'a') as f:
         #     f.write('%s\n' % s)
@@ -724,14 +719,13 @@ with torch.set_grad_enabled(False):
 
 # In[44]:
 
-
-print(test_y, np.array(all_pred))
+print("test_pred:", test_y, np.array(all_pred))
 
 
 # In[45]:
 
 
-plt.scatter(test_y[:]+64, np.array(all_pred)[:]+64)
-plt.ylabel("prediction")
-plt.xlabel("age_at_visit")
-plt.show()
+# plt.scatter(test_y[:]+64, np.array(all_pred)[:]+64)
+# plt.ylabel("prediction")
+# plt.xlabel("age_at_visit")
+# plt.show()
