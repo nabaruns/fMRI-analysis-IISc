@@ -1,0 +1,178 @@
+{
+    "descriptions": [
+       {
+          "dataType": "anat",
+          "modalityLabel": "T1w",
+          "criteria": {
+             "SidecarFilename": "002*"
+          }
+       },
+       {
+          "dataType": "fmap",
+          "modalityLabel": "epi",
+          "customLabels": "dir-AP",
+          "IntendedFor": [
+             4,
+             6
+          ],
+          "criteria": {
+             "SidecarFilename": "003*"
+          }
+       },
+       {
+          "dataType": "fmap",
+          "modalityLabel": "epi",
+          "customLabels": "dir-PA",
+          "IntendedFor": [
+             4,
+             6
+          ],
+          "criteria": {
+             "SidecarFilename": "004*"
+          }
+       },
+       {
+          "dataType": "func",
+          "modalityLabel": "sbref",
+          "customLabels": "task-bart_run-01",
+          "criteria": {
+             "SidecarFilename": "005*"
+          },
+          "sidecarChanges": {
+             "TaskName": "bart"
+          }
+       },
+       {
+          "dataType": "func",
+          "modalityLabel": "bold",
+          "customLabels": "task-bart_run-01",
+          "criteria": {
+             "SidecarFilename": "006*"
+          },
+          "sidecarChanges": {
+             "TaskName": "bart"
+          }
+       },
+       {
+          "dataType": "func",
+          "modalityLabel": "sbref",
+          "customLabels": "task-rest_run-01",
+          "criteria": {
+             "SidecarFilename": "007*"
+          },
+          "sidecarChanges": {
+             "TaskName": "rest"
+          }
+       },
+       {
+          "dataType": "func",
+          "modalityLabel": "bold",
+          "customLabels": "task-rest_run-01",
+          "criteria": {
+             "SidecarFilename": "008*"
+          },
+          "sidecarChanges": {
+             "TaskName": "rest"
+          }
+       },
+       {
+          "dataType": "anat",
+          "modalityLabel": "T2w",
+          "criteria": {
+             "SidecarFilename": "010*"
+          }
+       },
+       {
+          "dataType": "fmap",
+          "modalityLabel": "magnitude1",
+          "IntendedFor": [
+             11,
+             13
+          ],
+          "criteria": {
+             "SidecarFilename": "011*",
+             "EchoTime": 0.00492
+          }
+       },
+       {
+          "dataType": "fmap",
+          "modalityLabel": "phasediff",
+          "IntendedFor": [
+             11,
+             13
+          ],
+          "criteria": {
+             "SidecarFilename": "012*"
+          },
+          "sidecarChanges": {
+             "EchoTime1": 0.00492,
+             "EchoTime2": 0.00738
+          }
+       },
+       {
+          "dataType": "func",
+          "modalityLabel": "sbref",
+          "customLabels": "task-bart_run-02",
+          "criteria": {
+             "SidecarFilename": "013*"
+          },
+          "sidecarChanges": {
+             "TaskName": "bart"
+          }
+       },
+       {
+          "dataType": "func",
+          "modalityLabel": "bold",
+          "customLabels": "task-bart_run-02",
+          "criteria": {
+             "SidecarFilename": "014*"
+          },
+          "sidecarChanges": {
+             "TaskName": "bart"
+          }
+       },
+       {
+          "dataType": "func",
+          "modalityLabel": "sbref",
+          "customLabels": "task-rest_run-02",
+          "criteria": {
+             "SidecarFilename": "015*"
+          },
+          "sidecarChanges": {
+             "TaskName": "rest"
+          }
+       },
+       {
+          "dataType": "func",
+          "modalityLabel": "bold",
+          "customLabels": "task-rest_run-02",
+          "criteria": {
+             "SidecarFilename": "016*"
+          },
+          "sidecarChanges": {
+             "TaskName": "rest"
+          }
+       },
+       {
+          "dataType": "anat",
+          "modalityLabel": "FLAIR",
+          "criteria": {
+             "SidecarFilename": "017*"
+          }
+       },
+       {
+          "dataType": "dwi",
+          "modalityLabel": "dwi",
+          "criteria": {
+             "SidecarFilename": "018*"
+          }
+       },
+       {
+          "dataType": "dwi",
+          "modalityLabel": "dwi",
+          "criteria": {
+             "SidecarFilename": "019*"
+          }
+       }
+    ]
+ }

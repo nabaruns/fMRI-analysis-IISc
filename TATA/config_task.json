@@ -1,0 +1,18 @@
+{"descriptions":[
+{
+"dataType": "anat",
+"modalityLabel":"T1w",
+"criteria": 
+{"SidecarFilename": "*TA_5.12*"
+}
+},
+{
+"dataType": "func",
+"modalityLabel":"bold",
+"customLabels":"task-rest",
+"criteria": 
+{"SidecarFilename": "*COGLAB*"
+}
+}
+]
+}

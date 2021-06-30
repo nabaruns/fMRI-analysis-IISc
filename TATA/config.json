@@ -1,0 +1,49 @@
+{
+    "descriptions": [
+        {
+            "dataType": "func",
+            "modalityLabel": "bold",
+            "customLabels": "task-rest",
+            "criteria": {
+                   "SidecarFilename":"*ep2d*"
+                        },
+            "sidecarChanges": {
+                "TaskName": "rest"
+            }
+        },
+        {
+            "dataType": "anat",
+            "modalityLabel": "T1w",
+            "criteria": {
+                   "SidecarFilename": "*002**mpr*"
+                         }
+        },
+        {
+            "dataType": "fmap",
+            "modalityLabel": "magnitude1",
+            "criteria": {
+                "SidecarFilename": "*010**e1*"
+                        }
+        },
+        {
+            "dataType": "fmap",
+            "modalityLabel": "magnitude2",
+            "criteria": {
+                "SidecarFilename": "*010**e2*"
+                        }
+        },
+        {
+            "dataType": "fmap",
+            "modalityLabel": "phasediff", 
+            "intendedFor": 0,
+            "criteria": {
+                "SidecarFilename": "*gre**_ph*"
+                        },
+            "sidecarChanges": {
+                "EchoTime1": 0.00492,
+                "EchoTime2": 0.00738
+            }
+        }
+    ]
+}
+

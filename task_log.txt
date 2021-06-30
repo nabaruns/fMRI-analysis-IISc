@@ -1,0 +1,123 @@
+nabarun@DTI:~/141to170$ sudo unzip -q '*.zip' -d /media/varsha/Seagate\ Backup\ Plus\ Drive/ADNI_database/ADNI\ Labeled/CN/
+[sudo] password for nabarun:
+
+10 archives were successfully processed.
+
+nabarun@DTI:~/171to200$ sudo unzip -q '*.zip' -d /media/varsha/Seagate\ Backup\ Plus\ Drive/ADNI_database/ADNI\ Labeled/CN/
+[sudo] password for nabarun: 
+
+10 archives were successfully processed.
+
+nabarun@DTI:~/201to243$ sudo unzip -q '*.zip' -d /media/varsha/Seagate\ Backup\ Plus\ Drive/ADNI_database/ADNI\ Labeled/CN/
+[sudo] password for nabarun:
+
+25 archives were successfully processed.
+_____________________________________________________
+cp -r /media/varsha/Seagate\ Backup\ Plus\ Drive1/ADNI_database/ADNI\ Longitudinal/CN/ADNI/100_S_6349/ ~/BIDS2/Data/Subject9/
+_____________________________________________________
+cd ../Subject20_bids/
+dcm2bids_scaffold
+dcm2bids_helper -d /home/nabarun/RADC/Data/05225665_01/
+ls tmp_dcm2bids/helper/
+cp ~/BIDS2/BIDS/Subject5_bids/code/config.json code/
+rm -rf tmp_dcm2bids/
+dcm2bids -d /home/nabarun/RADC/Data/05225665_01/ -p 0522566501 -c /home/nabarun/RADC/config_dti.json
+sudo fmriprep-docker /home/nabarun/RADC/BIDS/09687331_00/ /home/nabarun/RADC/fmriprep/09687331_00/ --participant_label 09687331 --fs-license-file /home/varsha/Shreya/BIDS/freesurfer.txt --fs-no-reconall --output-spaces MNI152NLin6Asym:res-2
+
+_____________________________________________________
+unlink sym_radc
+ln -s /media/varsha/Seagate\ Backup\ Plus\ Drive1/MRI_DEVARAJAR/RADC_Dicom/ sym_radc
+_____________________________________________________
+    "EchoTime1": 0.00492, 
+
+    FSPGR 3
+    MPRAGE 5
+    ph 5
+_____________________________________________________
+
+singularity run --bind ~/RADC/sym_radc/:/data --cleanenv ~/my_images/fmriprep-1.4.1.simg \
+    /data/BIDS/43561786_00/ /data/fmriprep/43561786_00/ participant \
+    --fs-no-reconall --output-spaces MNI152NLin6Asym:res-2 \
+    --participant-label 43561786 --fs-license-file /data/freesurfer.txt \
+    --omp-nthreads 8 --nthreads 12 --mem_mb 30000
+
+find sym_radc/fmriprep/43561786_00/freesurfer -name "*IsRunning*" -delete
+
+_____________________________________________________
+
+sudo docker run --init -ti --rm \
+-v /home/nabarun/RADC/BIDS/05225665_01/:/inputs \
+-v /home/nabarun/RADC/dmriprep/05225665_01/:/outputs \
+-v /home/varsha/freesurfer:/freesurfer \
+-v /home/nabarun/RADC/dmriprep/work/:/work \
+nipreps/dmriprep:latest \
+/inputs /outputs \
+participant \
+-w /work \
+--participant-label 0522566501 \
+--fs-license-file /freesurfer/license.txt \
+--ignore fieldmaps --low-mem --fs-no-reconall --output-spaces MNI152NLin6Asym:res-2
+
+sudo docker run --init -ti --rm -v /home/nabarun/RADC/BIDS/05225665_01/:/inputs -v /home/nabarun/RADC/dmriprep/05225665_01/:/outputs -v /home/varsha/freesurfer:/freesurfer -v /home/nabarun/RADC/dmriprep/work/:/work nipreps/dmriprep:latest /inputs /outputs participant -w /work --participant-label 0522566501 --fs-license-file /freesurfer/license.txt --ignore fieldmaps  --fs-no-reconall --output-spaces MNI152NLin6Asym:res-2 --low-mem
+_____________________________________________________
+
+
+B1
+1 002_S_2263
+2 031_S_2022
+
+B2
+1 002_S_2010 
+2 020_S_6504 
+3 128_S_2002 
+4 128_S_0205 
+5 007_S_4488 
+6 033_S_4176
+7 037_S_0303
+8 098_S_6343 
+9 100_S_6349 
+10 141_S_6240 
+11 003_S_4900 
+12 009_S_4612 
+
+13 016_S_4951 
+14 018_S_6207 
+15 018_S_6351 
+16 021_S_4335 
+17 022_S_6797 
+18 129_S_6459 
+19 301_S_6224 
+20 094_S_2201 
+
+_____________________________________________________
+
+[['02695917', '02695917_04'], ['02950975', '02950975_02'], ['03060782', '03060782_01'], ['03227207', '03227207_10'], ['03902977', '03902977_11'], ['04319814', '04319814_02'], ['04319814', '04319814_04'], ['46433373', '46433373_02'], ['46516939', '46516939_10'], ['46516939', '46516939_12']]
+[['26581268', '26581268_04'], ['27083391', '27083391_08'], ['46808242', '46808242_09'], ['46957588', '46957588_04'], ['48331728', '48331728_02'], ['48451825', '48451825_10'], ['49094578', '49094578_04'], ['49297367', '49297367_00'], ['49428128', '49428128_00'], ['49428128', '49428128_02'], ['79953855', '79953855_04'], ['79978444', '79978444_02'], ['79978444', '79978444_04'], ['80352799', '80352799_03']]
+
+
+error tar
+79978444_04
+91231332_00 
+93417026_03
+93493992_10
+57311163_10
+07117738_05
+23354613_02
+
+['00709354_04', '00807897_04', '01841461_02', '01841461_04', '02158395_00', '02695917_04', '02950975_02', '03060782_01', '03227207_10', '03902977_11', '04319814_02', '04319814_04', '46433373_02', '46516939_10', '46516939_12', '46808242_09', '46957588_04', '48331728_02', '48451825_10', '49094578_04']
+
+_____________________________________________________
+singularity run --bind /4tb/nabarun/RADC/:/data --cleanenv /4tb/nabarun/my_images/fmriprep-1.4.1.simg \
+    /data/BIDS/43561786_00/ /data/fmriprepsing/43561786_00/ participant \
+    --fs-no-reconall --output-spaces MNI152NLin6Asym:res-2 \
+    --participant-label 43561786 --fs-license-file /data/freesurfer.txt \
+    --omp-nthreads 8 --nthreads 12 --mem_mb 30000
+
+python3 run_fmriprep.py -d sym_radc/BIDS/ -o sym_radc/fmriprep/ -c config.json
+_____________________________________________________
+
+unlink sym_radc 
+ln  -s /media/varsha/Seagate\ Backup\ Plus\ Drive/MRI_DEVARAJAR/RADC_Dicom/ sym_radc
+
+
+du -hd 1 RADC/sym_radc/fmriprep > fmriprepdir.txt 

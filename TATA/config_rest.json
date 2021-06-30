@@ -1,0 +1,18 @@
+{"descriptions":[
+{
+"dataType": "anat",
+"modalityLabel":"T1w",
+"criteria": 
+{"SidecarFilename": "*TA_9.14*"
+}
+},
+{
+"dataType": "func",
+"modalityLabel":"bold",
+"customLabels":"task-rest",
+"criteria": 
+{"SidecarFilename": "*_bold**RESTING_*"
+}
+}
+]
+}

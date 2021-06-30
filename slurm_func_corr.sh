@@ -1,6 +1,6 @@
 #!/bin/sh
 #SBATCH --job-name=func_corr    # Job name
-#SBATCH --array=1-344%10
+#SBATCH --array=1-26%10	# number of jobs (total%parallel)
 #SBATCH --ntasks=1         # Run on a single CPU
 #SBATCH --time=04:00:00  # Time limit hrs:min:sec
 #SBATCH -o log/%x-%A-%a.out
@@ -25,6 +25,8 @@ mkdir -p "$BIDS_DIR/$subject"
 
 echo "Copying $subject fmriprep"
 copy_cmd="scp -q -r nabarun@10.36.17.186:~/RADC/sym_radc/fmriprep/$subject/fmriprep/sub-*/*/*{bold.nii,timeseries,regressors}*.{tsv,gz} $BIDS_DIR/$subject"
+# copy_cmd="scp -q -r nabarun@10.36.17.186:~/RADC/sym_radc/fmriprep_uc/$subject/fmriprep/sub-*/*/*{bold.nii,timeseries,regressors}*.{tsv,gz} $BIDS_DIR/$subject"
+# copy_cmd="scp -q -r nabarun@10.36.17.186:/media/nabarun/TATA_MRI_Data_RAW/fmriprep_rest/$subject/fmriprep/sub-*/*/*{bold.nii,timeseries,regressors}*.{tsv,gz} $BIDS_DIR/$subject"
 echo Commandline: $copy_cmd
 # scp -r nabarun@10.36.17.186:'/media/varsha/Seagate\ Backup\ Plus\ Drive/MRI_DEVARAJAR/RADC_Dicom/BIDS/$subject/*' $BIDS_DIR/$subject/
 eval $copy_cmd

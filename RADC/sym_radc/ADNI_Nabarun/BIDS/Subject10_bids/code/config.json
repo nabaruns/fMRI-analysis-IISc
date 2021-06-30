@@ -1,0 +1,41 @@
+{
+    "descriptions": [
+        {
+            "dataType": "func",
+            "modalityLabel": "bold",
+            "customLabels": "task-rest",
+            "criteria": {
+                   "SidecarFilename":"*fMRI*"
+                        }
+        },
+        {
+            "dataType": "anat",
+            "modalityLabel": "T1w",
+            "criteria": {
+                   "SidecarFilename": "*MPRAGE*"
+                         }
+        },
+        {
+            "dataType": "fmap",
+            "modalityLabel": "magnitude1",
+            "criteria": {
+                "SidecarFilename": "*_e1.*"
+                }
+            },
+            {
+                "dataType": "fmap",
+                "modalityLabel": "magnitude2",
+                "criteria": {
+                    "SidecarFilename": "*_e2.*"
+                    }
+            },
+            {
+            "dataType": "fmap",
+            "modalityLabel": "phasediff",
+            "intendedFor": 0,
+            "criteria": {
+                "SidecarFilename": "*_ph*"
+                }
+            }
+       ]
+}

@@ -24,7 +24,7 @@ from torchvision import transforms
 from torch.utils.data import DataLoader, TensorDataset
 from torch import Tensor
 
-RANDOM_STATE = int(sys.argv[1])+71
+RANDOM_STATE = int(sys.argv[1])
 random.seed(RANDOM_STATE)
 np.random.seed(RANDOM_STATE)
 
