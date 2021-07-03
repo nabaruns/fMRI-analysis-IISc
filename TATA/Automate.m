@@ -1,12 +1,12 @@
-addpath('/home/varsha/Shreya/BIDS'); % Path where this script is stored
+addpath('/home/nabarun'); % Path where this script is stored
 
-Freesurfer_license_path = '/home/varsha/Shreya/BIDS/freesurfer.txt'; %change as needed
+Freesurfer_license_path = '/home/nabarun/license.txt'; %change as needed
 
-DICOM_path = '/home/varsha/Shreya/BIDS/Tata/Data'; % Path where folders are stored with the names Subject# (eg. Subject3)
+DICOM_path = '/home/nabarun/TATA/Data'; % Path where folders are stored with the names Subject# (eg. Subject3)
 
-BIDS_path = '/home/varsha/Shreya/BIDS/Tata/BIDS'; % Path to store BIDS structured folders (dcm2bids output)
+BIDS_path = '/home/nabarun/TATA/BIDS'; % Path to store BIDS structured folders (dcm2bids output)
 
-fmriprep_path = '/home/varsha/Shreya/BIDS/Tata/fmriprep'; %Path to fmriprep output files
+fmriprep_path = '/home/nabarun/TATA/fmriprep'; %Path to fmriprep output files
 
 
 %Get a list of Subjects present in the DICOM folder
@@ -20,17 +20,20 @@ Sub_size = size(Sub_list);
 for i = 3:Sub_size(1,1) % for each subject in the DICOM folder
 
     Label_size = size(Sub_list(i).name);
-    Participant_label = Sub_list(i).name(8:Label_size(1,2));
+    dicom_dir = Sub_list(i).name(1:Label_size(1,2));
+    Participant_label = regexprep(dicom_dir, '_', '');
+
+    disp(Participant_label);
     
-    Dicom_sub_path = sprintf('%s/Subject%s/DICOM',DICOM_path,Participant_label); %path to the subject's DICOM folder
+    Dicom_sub_path = sprintf('%s/%s',DICOM_path,dicom_dir); %path to the subject's DICOM folder
     
-    mkdir(sprintf('%s/BIDS_Subject%s',BIDS_path,Participant_label)); %create subject's BIDS folder
+    mkdir(sprintf('%s/%s',BIDS_path,Participant_label)); %create subject's BIDS folder
     
-    BIDS_sub_path = sprintf('%s/BIDS_Subject%s',BIDS_path,Participant_label);
+    BIDS_sub_path = sprintf('%s/%s',BIDS_path,Participant_label);
     
-    mkdir(sprintf('%s/Out_Subject%s',fmriprep_path,Participant_label)); %create subject's fmriprep output folder
+    mkdir(sprintf('%s/%s',fmriprep_path,Participant_label)); %create subject's fmriprep output folder
     
-    fmriprep_sub_path = sprintf('%s/Out_Subject%s',fmriprep_path,Participant_label);
+    fmriprep_sub_path = sprintf('%s/%s',fmriprep_path,Participant_label);
     
     cmd = sprintf('cd %s; dcm2bids_scaffold;',BIDS_sub_path); %CD to BIDS folder, create BIDS structure
     status = system(cmd);
