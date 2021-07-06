@@ -1,3 +1,10 @@
+# Author: Nabarun Sarkar
+# nabsarkar@gmail.com
+
+# To convert the fMRIprep output into correlation matrix of the rest and task data
+# Copy {bold.nii,timeseries,regressors}*.{tsv,gz} into <BIDS_DIR_PATH/subject_dir_name>
+# Run as: python3 slurm_func_conn_gen.py <subject_dir_name> <BIDS_DIR_PATH> <OUT_DIR_PATH>
+
 import os
 import argparse
 import shutil
@@ -136,7 +143,6 @@ subject_id = sys.argv[1]
 in_dir = os.path.join(sys.argv[2],subject_id)
 out_dir = os.path.join(sys.argv[3],subject_id)
 
-# df = pd.read_csv(base_dir+'/fmriprep_list', header=None)
 
 ########## schaefer 400/1000 ROI #########
 dataset = datasets.fetch_atlas_schaefer_2018(n_rois=400, yeo_networks=7, 
@@ -155,5 +161,3 @@ masker = NiftiLabelsMasker(labels_img=atlas_filename, standardize=True,
 #     low_pass=.1, high_pass=.01, memory='nilearn_cache', memory_level=1)
 
 f(in_dir, out_dir, subject_id)
-# p = Pool()
-# p.map(f, df[0])
